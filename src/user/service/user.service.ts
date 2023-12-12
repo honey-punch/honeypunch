@@ -10,9 +10,9 @@ export class UserService {
     return this.prismaService.user.findMany();
   }
 
-  async fetchUser(id: number): Promise<User | null> {
+  async fetchUser(username: string): Promise<User | null> {
     return this.prismaService.user.findUnique({
-      where: { id: Number(id) },
+      where: { username },
     });
   }
 
@@ -23,22 +23,23 @@ export class UserService {
   }
 
   async updateUser(
-    id: number,
+    id: string,
     username: string,
     password: string,
   ): Promise<User | null> {
     return this.prismaService.user.update({
-      where: { id: Number(id) },
+      where: { username },
       data: {
+        id: id,
         username: username,
         password: password,
       },
     });
   }
 
-  async deleteUser(id: number): Promise<User | null> {
+  async deleteUser(username: string): Promise<User | null> {
     return this.prismaService.user.delete({
-      where: { id: Number(id) },
+      where: { username },
     });
   }
 }

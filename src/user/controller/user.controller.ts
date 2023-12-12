@@ -20,8 +20,8 @@ export class UserController {
   }
 
   @Get(':id')
-  async fetchUser(@Param('id') id: number): Promise<User | null> {
-    return this.userService.fetchUser(id);
+  async fetchUser(@Param('id') username: string): Promise<User | null> {
+    return this.userService.fetchUser(username);
   }
 
   @Post()
@@ -31,14 +31,14 @@ export class UserController {
 
   @Put(':id')
   async updateUser(
-    @Param('id') id: number,
+    @Param('id') id: string,
     @Body() data: User,
   ): Promise<User | null> {
     return this.userService.updateUser(id, data.username, data.password);
   }
 
   @Delete(':id')
-  async deleteUser(@Param('id') id: number): Promise<User | null> {
+  async deleteUser(@Param('id') id: string): Promise<User | null> {
     return this.userService.deleteUser(id);
   }
 }
