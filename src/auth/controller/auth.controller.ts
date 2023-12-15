@@ -10,12 +10,25 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Get('/auth')
-  async me(@Req() req: Request): Promise<Auth> {
+  async me(
+    @Req() req: Request,
+    @Res() res: Response,
+  ): Promise<Auth | Response> {
     const jwt = req.cookies['jwt'];
-    if (!jwt) return { status: false };
+    if (!jwt) {
+      res.status(401);
+      return res.send({ status: false });
+    }
 
     const result = await this.authService.me(jwt);
-    return result.sub ? { status: true } : { status: false };
+
+    if (result.sub) {
+      res.status(200);
+      return res.send({ message: true });
+    } else {
+      res.status(401);
+      return res.send({ message: false });
+    }
   }
 
   @Post('/login')
