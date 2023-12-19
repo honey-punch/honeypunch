@@ -1,7 +1,9 @@
-//import { User } from '@prisma/client';
+import { User } from '@prisma/client';
 
 export class Login {
   access_token: string;
+  refresh_token: string;
+  user: User;
 }
 
 export class LoginRequestDto {

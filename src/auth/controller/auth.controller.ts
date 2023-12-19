@@ -32,7 +32,7 @@ export class AuthController {
   async login(
     @Body() data: LoginRequestDto,
     @Res() res: Response,
-  ): Promise<Response<Login> | null> {
+  ): Promise<Response<Login>> {
     const user = await this.authService.validateUser(
       data.username,
       data.password,
@@ -47,6 +47,7 @@ export class AuthController {
     );
 
     await this.userService.setCurrentRefreshToken(user.username, refresh_token);
+    const updatedUser = await this.userService.fetchUser(user.username);
     res.setHeader('Authorization', 'Bearer ' + [access_token, refresh_token]);
     res.cookie('access_token', access_token, {
       httpOnly: true,
@@ -56,7 +57,7 @@ export class AuthController {
       httpOnly: true,
       maxAge: REFRESH_TOKEN_EXP,
     });
-    return res.send({ access_token, refresh_token });
+    return res.send({ access_token, refresh_token, user: updatedUser });
   }
 
   @Post('/refresh')
