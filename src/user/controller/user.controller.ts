@@ -11,12 +11,13 @@ import {
 import { UserService } from '../service/user.service';
 import { User } from '@prisma/client';
 import { UserGuard } from '../user.guard';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('/api/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(UserGuard)
+  @UseGuards(JwtAuthGuard)
   @Get()
   async fetchAllUser(): Promise<User[]> {
     return this.userService.fetchAllUser();

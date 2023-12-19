@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { User } from '@prisma/client';
+import { REFRESH_TOKEN_EXP } from 'src/auth/constants';
 
 @Injectable()
 export class UserService {
@@ -30,10 +31,53 @@ export class UserService {
     return this.prismaService.user.update({
       where: { username },
       data: {
-        id: id,
-        username: username,
-        password: password,
+        id,
+        username,
+        password,
       },
+    });
+  }
+
+  async setCurrentRefreshToken(username: string, refreshToken: string) {
+    const newRefreshTokenExp = await this.getCurrentRefreshTokenExp();
+    return this.prismaService.user.update({
+      where: { username },
+      data: {
+        refreshToken,
+        refreshTokenExp: newRefreshTokenExp,
+      },
+    });
+  }
+
+  async getCurrentRefreshTokenExp() {
+    const currentDate = new Date();
+    const currentRefreshTokenExp = new Date(
+      currentDate.getTime() + REFRESH_TOKEN_EXP,
+    );
+    return currentRefreshTokenExp.toString();
+  }
+
+  async getUserIfRefreshTokenMatches(
+    refreshToken: string,
+    username: string,
+  ): Promise<User> {
+    const user: User = await this.prismaService.user.findUnique({
+      where: { username },
+    });
+
+    if (!user.refreshToken) {
+      return null;
+    }
+
+    if (user.refreshToken === refreshToken) {
+      return user;
+    }
+  }
+
+  async removeRefreshToken(username: string): Promise<User> {
+    return await this.prismaService.user.update({
+      where: { username },
+      data: { refreshToken: null, refreshTokenExp: null },
     });
   }
 

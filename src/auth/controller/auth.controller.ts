@@ -1,50 +1,100 @@
-import { Controller, Get, Post, Req, Res, Body } from '@nestjs/common';
-import { Request } from 'express';
+import {
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  Body,
+  UseGuards,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
 import { AuthService } from '../service/auth.service';
-import { User } from '@prisma/client';
-import { Auth, Login } from 'src/auth/auth.dto';
-import { Response } from 'express';
+import { UserService } from 'src/user/service/user.service';
+import {
+  Login,
+  RefreshDto,
+  LoginRequestDto,
+  LogoutRequestDto,
+} from 'src/auth/auth.dto';
+import { JwtAuthGuard } from '../jwt-auth.guard';
+import { JwtRefreshGuard } from '../jwt-refresh.guard';
+import { ACCESS_TOKEN_EXP, REFRESH_TOKEN_EXP } from '../constants';
 
 @Controller('/api')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
-
-  @Get('/auth')
-  async me(
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Promise<Auth | Response> {
-    const jwt = req.cookies['jwt'];
-    if (!jwt) {
-      res.status(401);
-      return res.send({ status: false });
-    }
-
-    const result = await this.authService.me(jwt);
-
-    if (result.sub) {
-      res.status(200);
-      return res.send({ message: true });
-    } else {
-      res.status(401);
-      return res.send({ message: false });
-    }
-  }
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
 
   @Post('/login')
   async login(
-    @Body() data: Omit<User, 'id'>,
+    @Body() data: LoginRequestDto,
     @Res() res: Response,
   ): Promise<Response<Login> | null> {
-    const loginUser = await this.authService.login(
+    const user = await this.authService.validateUser(
       data.username,
       data.password,
     );
-    res.setHeader('Authorization', 'Bearer ' + loginUser.access_token);
-    res.cookie('jwt', loginUser.access_token, {
+    const access_token = await this.authService.generateAccessToken(
+      data.username,
+      data.password,
+    );
+    const refresh_token = await this.authService.generateRefreshToken(
+      data.username,
+      data.password,
+    );
+
+    await this.userService.setCurrentRefreshToken(user.username, refresh_token);
+    res.setHeader('Authorization', 'Bearer ' + [access_token, refresh_token]);
+    res.cookie('access_token', access_token, {
       httpOnly: true,
-      maxAge: 60 * 1000,
+      maxAge: ACCESS_TOKEN_EXP,
     });
-    return res.send(loginUser);
+    res.cookie('refresh_token', refresh_token, {
+      httpOnly: true,
+      maxAge: REFRESH_TOKEN_EXP,
+    });
+    return res.send({ access_token, refresh_token });
+  }
+
+  @Post('/refresh')
+  async refresh(
+    @Body() refreshToken: RefreshDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    try {
+      const newAccessToken = (await this.authService.refresh(refreshToken))
+        .access_token;
+      res.setHeader('Authorization', `Bearer ${newAccessToken}`);
+      res.cookie('access_token', newAccessToken, {
+        httpOnly: true,
+      });
+      res.send({ access_token: newAccessToken });
+    } catch (error) {
+      throw new UnauthorizedException('fuck');
+    }
+  }
+
+  @Post('/logout')
+  @UseGuards(JwtRefreshGuard)
+  async logout(
+    @Body()
+    user: LogoutRequestDto,
+    @Res() res: Response,
+  ) {
+    await this.userService.removeRefreshToken(user.username);
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+    return res.send({
+      message: 'logout success',
+    });
+  }
+
+  @Get('/profile')
+  @UseGuards(JwtAuthGuard)
+  getProfile(@Req() req: Request) {
+    return req.user;
   }
 }
