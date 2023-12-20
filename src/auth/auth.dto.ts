@@ -2,7 +2,6 @@ import { User } from '@prisma/client';
 
 export class Login {
   access_token: string;
-  refresh_token: string;
   user: User;
 }
 
@@ -11,19 +10,16 @@ export class LoginRequestDto {
   password: string;
 }
 
-export class LogoutRequestDto {
-  username: string;
-}
-
 export class Auth {
   status: boolean;
 }
 
-export class RefreshDto {
-  refresh_token: string;
+export class Payload {
+  sub: string;
+  username: string;
 }
 
-export interface Payload {
-  sub: string;
+export class Profile {
+  id: string;
   username: string;
 }

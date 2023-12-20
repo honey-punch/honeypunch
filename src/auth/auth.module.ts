@@ -7,7 +7,6 @@ import { UserModule } from 'src/user/user.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtAuthStrategy } from './jwt-auth.strategy';
 import { UserService } from 'src/user/service/user.service';
-import { JwtRefreshStrategy } from './jwt-refresh.strategy';
 import { JWT_SECRET } from './constants';
 
 @Module({
@@ -20,12 +19,6 @@ import { JWT_SECRET } from './constants';
     PassportModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    PrismaService,
-    UserService,
-    JwtAuthStrategy,
-    JwtRefreshStrategy,
-  ],
+  providers: [AuthService, PrismaService, UserService, JwtAuthStrategy],
 })
 export class AuthModule {}
