@@ -25,11 +25,12 @@ export class AuthService {
     const user = await this.prismaService.user.findUnique({
       where: { username },
     });
-
-    return this.jwtService.signAsync(
+    const result = await this.jwtService.signAsync(
       { sub: user.id, username: user.username },
       { expiresIn: ACCESS_TOKEN_EXP },
     );
+
+    return result;
   }
 
   getCooKieMaxAge(maxAge: number) {

@@ -6,6 +6,7 @@ import {
   Res,
   Body,
   UseGuards,
+  Param,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from '../service/auth.service';
@@ -36,6 +37,7 @@ export class AuthController {
     res.cookie('access_token', access_token, {
       httpOnly: true,
       maxAge: ACCESS_TOKEN_EXP * 1000,
+      path: '/',
     });
 
     const maxAge = this.authService.getCooKieMaxAge(ACCESS_TOKEN_EXP);
@@ -43,6 +45,7 @@ export class AuthController {
     res.cookie('token_max_age', maxAge, {
       httpOnly: true,
       maxAge: ACCESS_TOKEN_EXP * 1000,
+      path: '/',
     });
 
     return res.send({ access_token, user });
@@ -60,30 +63,37 @@ export class AuthController {
   @Get('/profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@Req() req: Request) {
+    console.log('profile!');
+
     return req.user;
   }
 
-  @Get('/reissue')
+  @Get('/reissue/:username')
   @UseGuards(JwtAuthGuard)
-  async reissue(@Req() req, @Res() res: Response) {
-    const user = req.user;
-    const access_token = await this.authService.generateAccessToken(
-      user.username,
-    );
+  async reissue(
+    @Param('username') username: string,
+    @Res() res: Response,
+  ): Promise<Response<{ access_token: string }>> {
+    console.log('reissue');
+
+    const access_token = await this.authService.generateAccessToken(username);
 
     res.setHeader('Authorization', 'Bearer ' + access_token);
     res.cookie('access_token', access_token, {
       httpOnly: true,
       maxAge: ACCESS_TOKEN_EXP * 1000,
+      path: '/',
     });
+    console.log(access_token);
 
-    const maxAge = this.authService.getCooKieMaxAge(ACCESS_TOKEN_EXP);
+    const token_max_age = this.authService.getCooKieMaxAge(ACCESS_TOKEN_EXP);
 
-    res.cookie('token_max_age', maxAge, {
+    res.cookie('token_max_age', token_max_age, {
       httpOnly: true,
       maxAge: ACCESS_TOKEN_EXP * 1000,
+      path: '/',
     });
 
-    return res.send({ access_token });
+    return res.send({ access_token, token_max_age });
   }
 }
