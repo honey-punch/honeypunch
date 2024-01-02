@@ -63,8 +63,6 @@ export class AuthController {
   @Get('/profile')
   @UseGuards(JwtAuthGuard)
   async getProfile(@Req() req: Request) {
-    console.log('profile!');
-
     return req.user;
   }
 
@@ -74,9 +72,11 @@ export class AuthController {
     @Param('username') username: string,
     @Res() res: Response,
   ): Promise<Response<{ access_token: string }>> {
-    console.log('reissue');
+    res.clearCookie('access_token');
+    res.clearCookie('token_max_age');
 
     const access_token = await this.authService.generateAccessToken(username);
+    const token_max_age = this.authService.getCooKieMaxAge(ACCESS_TOKEN_EXP);
 
     res.setHeader('Authorization', 'Bearer ' + access_token);
     res.cookie('access_token', access_token, {
@@ -84,9 +84,6 @@ export class AuthController {
       maxAge: ACCESS_TOKEN_EXP * 1000,
       path: '/',
     });
-    console.log(access_token);
-
-    const token_max_age = this.authService.getCooKieMaxAge(ACCESS_TOKEN_EXP);
 
     res.cookie('token_max_age', token_max_age, {
       httpOnly: true,
