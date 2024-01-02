@@ -32,6 +32,7 @@ export class AuthController {
     const access_token = await this.authService.generateAccessToken(
       data.username,
     );
+    const maxAge = this.authService.getCooKieMaxAge(ACCESS_TOKEN_EXP);
 
     res.setHeader('Authorization', 'Bearer ' + access_token);
     res.cookie('access_token', access_token, {
@@ -39,8 +40,6 @@ export class AuthController {
       maxAge: ACCESS_TOKEN_EXP * 1000,
       path: '/',
     });
-
-    const maxAge = this.authService.getCooKieMaxAge(ACCESS_TOKEN_EXP);
 
     res.cookie('token_max_age', maxAge, {
       httpOnly: true,

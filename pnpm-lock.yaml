@@ -22,7 +22,7 @@ dependencies:
     version: 10.0.0(@nestjs/common@10.0.0)(@nestjs/core@10.0.0)
   '@nestjs/swagger':
     specifier: github:nestjs/swagger
-    version: github.com/nestjs/swagger/658f9756172d32448bcd8b4456239b7f0e0dbeaf(@nestjs/common@10.0.0)(@nestjs/core@10.0.0)(reflect-metadata@0.1.13)
+    version: github.com/nestjs/swagger/836030d9a9291192bfb5ffdb47e0960269a6e9a5(@nestjs/common@10.0.0)(@nestjs/core@10.0.0)(reflect-metadata@0.1.13)
   '@prisma/client':
     specifier: 5.7.0
     version: 5.7.0(prisma@5.7.0)
@@ -5534,9 +5534,9 @@ packages:
     engines: {node: '>=10'}
     dev: true
 
-  github.com/nestjs/swagger/658f9756172d32448bcd8b4456239b7f0e0dbeaf(@nestjs/common@10.0.0)(@nestjs/core@10.0.0)(reflect-metadata@0.1.13):
-    resolution: {tarball: https://codeload.github.com/nestjs/swagger/tar.gz/658f9756172d32448bcd8b4456239b7f0e0dbeaf}
-    id: github.com/nestjs/swagger/658f9756172d32448bcd8b4456239b7f0e0dbeaf
+  github.com/nestjs/swagger/836030d9a9291192bfb5ffdb47e0960269a6e9a5(@nestjs/common@10.0.0)(@nestjs/core@10.0.0)(reflect-metadata@0.1.13):
+    resolution: {tarball: https://codeload.github.com/nestjs/swagger/tar.gz/836030d9a9291192bfb5ffdb47e0960269a6e9a5}
+    id: github.com/nestjs/swagger/836030d9a9291192bfb5ffdb47e0960269a6e9a5
     name: '@nestjs/swagger'
     version: 7.1.17
     peerDependencies:
